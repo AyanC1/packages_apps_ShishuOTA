@@ -63,8 +63,6 @@
     <string name="menu_delete_update">Delete</string>
     <string name="menu_copy_url">Copy URL</string>
     <string name="menu_export_update">Export update</string>
-    <string name="menu_show_changelog">Show changelog</string>
-    <string name="menu_changelog_url" translatable="false">https://bootleggersrom-devices.github.io/changelog/<xliff:g id="device_name">%1$s</xliff:g></string>
     <string name="menu_ab_perf_mode">Prioritize update process</string>
 
     <string name="snack_updates_found">New updates found</string>
@@ -132,8 +130,7 @@
     <string name="menu_mobile_data_warning">Mobile data warning</string>
 
     <string name="blocked_update_dialog_title">Update blocked</string>
-    <string name="blocked_update_dialog_message">This update cannot be installed using the updater app.  Please read <xliff:g id="info_url">%1$s</xliff:g> for more information.</string>
-    <string name="blocked_update_info_url" translatable="false">http://wiki.lineageos.org/upgrading.html</string>
+    <string name="blocked_update_dialog_message">This update cannot be installed using the updater app.</string>
 
     <string name="export_channel_title">Export completion</string>
     <string name="new_updates_channel_title">New updates</string>
@@ -151,4 +148,14 @@
     <string name="update_new_release">A new update came for your %s!</string>
     <string name="update_new_release_small">Check the new improvements and changes that this build brings or download it right now.</string>
     <string name="update_new_release_big">Check the new stuff that\'s waiting for you or download this new release right now.</string>
+
+    <!-- changelog -->
+    <string name="changelog_url" translatable="false">https://raw.githubusercontent.com/BootleggersROM-Devices/BootleggersROM-Devices.github.io/master/_changelog/<xliff:g id="device_name">%1$s</xliff:g>.md</string>
+    <string name="changelog_fail">Failed to retrieve changelog</string>
+
+    <!-- Up to date card -->
+    <string name="update_old_title">Hey, you\'re up to date!</string>
+    <string name="update_old_summary">Now that the installation completed successfully, you can get the zip from /data/shishu_updates or delete it to save some space.</string>
+    <string name="update_about_install">The update got downloaded successfully, now whenever you\'re ready, press the Install button and let\'s get this device updated.</string>
+
 </resources>

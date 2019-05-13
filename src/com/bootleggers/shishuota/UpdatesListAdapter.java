@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.PowerManager;
 import android.os.SystemProperties;
@@ -56,8 +57,11 @@ import com.bootleggers.shishuota.misc.Utils;
 import com.bootleggers.shishuota.model.UpdateInfo;
 import com.bootleggers.shishuota.model.UpdateStatus;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.io.IOException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.List;
@@ -82,10 +86,13 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
         DELETE,
         CANCEL_INSTALLATION,
         REBOOT,
+        CHANGELOG,
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private Button mAction;
+        private Button mChangelog;
+        private TextView mUpdateTitle;
 
         private TextView mBuildDate;
         private TextView mBuildVersion;
@@ -98,6 +105,8 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
         public ViewHolder(final View view) {
             super(view);
             mAction = (Button) view.findViewById(R.id.update_action);
+            mChangelog = (Button) view.findViewById(R.id.update_changelog);
+            mUpdateTitle = (TextView) view.findViewById(R.id.update_card_title);
 
             mBuildDate = (TextView) view.findViewById(R.id.build_date);
             mBuildVersion = (TextView) view.findViewById(R.id.build_version);
@@ -188,7 +197,9 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
         viewHolder.mProgressText.setVisibility(View.VISIBLE);
         viewHolder.mBuildSize.setVisibility(View.INVISIBLE);
         viewHolder.mBuildVersion.setVisibility(View.GONE);
-        viewHolder.mBuildSummary.setVisibility(View.GONE);
+
+        // changelog button
+        setButtonAction(viewHolder.mChangelog, Action.CHANGELOG, downloadId, true);
     }
 
     private void handleNotActiveStatus(ViewHolder viewHolder, UpdateInfo update) {
@@ -203,6 +214,15 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
             setButtonAction(viewHolder.mAction,
                     Utils.canInstall(update) ? Action.INSTALL : Action.DELETE,
                     downloadId, !isBusy());
+            if (Utils.canInstall(update))  {
+                viewHolder.mUpdateTitle.setText(mActivity.getString(R.string.update_title));
+                viewHolder.mBuildSummary.setText(mActivity.getString(R.string.update_about_install));
+                viewHolder.mChangelog.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.mUpdateTitle.setText(mActivity.getString(R.string.update_old_title));
+                viewHolder.mBuildSummary.setText(mActivity.getString(R.string.update_old_summary));
+                viewHolder.mChangelog.setVisibility(View.GONE);
+            }
         } else if (!Utils.canInstall(update)) {
             viewHolder.itemView.setOnLongClickListener(
                     getLongClickListener(update, false, viewHolder.mBuildDate));
@@ -210,6 +230,11 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
         } else {
             viewHolder.itemView.setOnLongClickListener(
                     getLongClickListener(update, false, viewHolder.mBuildDate));
+            viewHolder.mUpdateTitle.setText(mActivity.getString(R.string.update_title));
+            viewHolder.mBuildSummary.setText(mActivity.getString(
+                            R.string.update_summary, mActivity.getString(
+                            R.string.update_new_release, SystemProperties.get(Constants.PROP_DEVICE)), mActivity.getString(
+                            R.string.update_new_release_small)));
             setButtonAction(viewHolder.mAction, Action.DOWNLOAD, downloadId, !isBusy());
         }
         String fileSize = Formatter.formatShortFileSize(mActivity, update.getFileSize());
@@ -219,16 +244,15 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
         viewHolder.mProgressText.setVisibility(View.INVISIBLE);
         viewHolder.mBuildSize.setVisibility(View.VISIBLE);
         viewHolder.mBuildVersion.setVisibility(View.GONE);
-        viewHolder.mBuildSummary.setText(mActivity.getString(
-                        R.string.update_summary, mActivity.getString(
-                        R.string.update_new_release, SystemProperties.get(Constants.PROP_DEVICE)), mActivity.getString(
-                        R.string.update_new_release_small)));
         /**if (Utils.isBigRelease()) {
             viewHolder.mBuildVersion.setVisibility(View.VISIBLE);
             viewHolder.mBuildVersion.setText(Utils.getReleaseVersion(update.getName()));
         } else {
             viewHolder.mBuildVersion.setVisibility(View.GONE)
         }**/
+
+        // changelog button
+        setButtonAction(viewHolder.mChangelog, Action.CHANGELOG, downloadId, true);
     }
 
     @Override
@@ -316,7 +340,7 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
         CheckBox checkbox = (CheckBox) checkboxView.findViewById(R.id.checkbox);
         checkbox.setText(R.string.checkbox_mobile_data_warning);
 
-        new AlertDialog.Builder(mActivity)
+        new AlertDialog.Builder(mActivity, R.style.UpdaterAlertDialogStyle)
                 .setTitle(R.string.update_on_mobile_data_title)
                 .setMessage(R.string.update_on_mobile_data_message)
                 .setView(checkboxView)
@@ -408,6 +432,10 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
                 } : null;
             }
             break;
+            case CHANGELOG: {
+                clickListener = enabled ? view -> new getChangelogDialog().execute(Utils.getChangelogURL(view.getContext())) : null;
+            }
+            break;
             default:
                 clickListener = null;
         }
@@ -427,7 +455,7 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
     }
 
     private AlertDialog.Builder getDeleteDialog(final String downloadId) {
-        return new AlertDialog.Builder(mActivity)
+        return new AlertDialog.Builder(mActivity, R.style.UpdaterAlertDialogStyle)
                 .setTitle(R.string.confirm_delete_dialog_title)
                 .setMessage(R.string.confirm_delete_dialog_message)
                 .setPositiveButton(android.R.string.ok,
@@ -452,7 +480,7 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
             String message = resources.getString(R.string.dialog_battery_low_message_pct,
                     resources.getInteger(R.integer.battery_ok_percentage_discharging),
                     resources.getInteger(R.integer.battery_ok_percentage_charging));
-            return new AlertDialog.Builder(mActivity)
+            return new AlertDialog.Builder(mActivity, R.style.UpdaterAlertDialogStyle)
                     .setTitle(R.string.dialog_battery_low_title)
                     .setMessage(message)
                     .setPositiveButton(android.R.string.ok, null);
@@ -473,7 +501,7 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
         String buildDate = Utils.getParsedDate(update.getBuildDate(), true);
         String buildInfoText = mActivity.getString(R.string.list_build_version_date,
                 BuildInfoUtils.getBuildVersion(), buildDate);
-        return new AlertDialog.Builder(mActivity)
+        return new AlertDialog.Builder(mActivity, R.style.UpdaterAlertDialogStyle)
                 .setTitle(R.string.apply_update_dialog_title)
                 .setMessage(mActivity.getString(resId, buildInfoText,
                         mActivity.getString(android.R.string.ok)))
@@ -483,7 +511,7 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
     }
 
     private AlertDialog.Builder getCancelInstallationDialog() {
-        return new AlertDialog.Builder(mActivity)
+        return new AlertDialog.Builder(mActivity, R.style.UpdaterAlertDialogStyle)
                 .setMessage(R.string.cancel_installation_dialog_message)
                 .setPositiveButton(android.R.string.ok,
                         (dialog, which) -> {
@@ -550,18 +578,53 @@ public class UpdatesListAdapter extends RecyclerView.Adapter<UpdatesListAdapter.
     }
 
     private void showInfoDialog() {
-        String messageString = String.format(StringGenerator.getCurrentLocale(mActivity),
-                mActivity.getString(R.string.blocked_update_dialog_message),
-                mActivity.getString(R.string.blocked_update_info_url));
-        SpannableString message = new SpannableString(messageString);
-        Linkify.addLinks(message, Linkify.WEB_URLS);
-        AlertDialog dialog = new AlertDialog.Builder(mActivity)
+        AlertDialog dialog = new AlertDialog.Builder(mActivity, R.style.UpdaterAlertDialogStyle)
                 .setTitle(R.string.blocked_update_dialog_title)
                 .setPositiveButton(android.R.string.ok, null)
-                .setMessage(message)
+                .setMessage(R.string.blocked_update_dialog_message)
                 .show();
         TextView textView = (TextView) dialog.findViewById(android.R.id.message);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
+    }
+
+    private class getChangelogDialog extends AsyncTask<String, Void, String> {
+
+        protected String doInBackground(String... strings) {
+            String outputString = "";
+            String inputString;
+            int i = 0;
+
+            try {
+                URL changelog = new URL(strings[0]);
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(
+                        changelog.openStream()));
+
+                while((inputString = in.readLine()) != null) {
+                    // don't include the top 4 lines of the changelog
+                    if (i >= 4) {
+                        outputString += inputString + "\n";
+                    }
+                    i++;
+                }
+
+                in.close();
+                return outputString;
+            } catch(IOException e) {
+                Log.e(TAG, "Could not fetch changelog from " + strings[0]);
+                return mActivity.getResources().getString(R.string.changelog_fail);
+            }
+        }
+
+        protected void onPostExecute(String result) {
+            AlertDialog dialog = new AlertDialog.Builder(mActivity, R.style.UpdaterAlertDialogStyle)
+                    .setTitle(R.string.update_button_changelog)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .setMessage(result)
+                    .show();
+            TextView textView = (TextView) dialog.findViewById(android.R.id.message);
+            textView.setMovementMethod(LinkMovementMethod.getInstance());
+        }
     }
 
     private boolean isBatteryLevelOk() {

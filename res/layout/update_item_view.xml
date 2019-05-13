@@ -49,6 +49,7 @@
                 android:alpha="0.9"
                 android:letterSpacing="0.08"
                 android:textAllCaps="true"
+                android:textColor="@color/app_title_text_color"
                 tools:text="29 February 2018" />
 
             <TextView
@@ -61,7 +62,7 @@
                 android:drawablePadding="8dp"
                 android:maxLines="1"
                 android:paddingBottom="8sp"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="@color/app_title_text_color"
                 android:textSize="20sp"
                 tools:text="BootleggersROM 4.0" />
 
@@ -74,7 +75,7 @@
                 android:paddingTop="4dp"
                 android:drawablePadding="8dp"
                 android:paddingBottom="8sp"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="@color/app_title_text_color"
                 android:textSize="14sp" />
 
             <RelativeLayout
@@ -101,6 +102,7 @@
                     android:ellipsize="marquee"
                     android:singleLine="true"
                     android:visibility="invisible"
+                    android:textColor="@color/app_title_text_color"
                     tools:text="162MB of 300 MB (3 minutes left) • 65%"
                     tools:visibility="visible" />
 
@@ -109,6 +111,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingTop="8sp"
+                    android:textColor="@color/app_title_text_color"
                     android:singleLine="true"
                     tools:text="300 MB"
                     tools:visibility="invisible" />

@@ -10,4 +10,7 @@
     <color name="header_title_text_color">#de000000</color>
     <color name="header_title_version_text_color">@color/header_title_text_color</color>
     <color name="header_title_update_info_text_color">@color/header_title_text_color</color>
+    <color name="app_title_text_color">@color/header_title_text_color</color>
+    <color name="card_update_bg">#ffffff</color>
+    <color name="popup_bg">@color/card_update_bg</color>
 </resources>

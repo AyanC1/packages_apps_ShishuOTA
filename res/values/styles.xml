@@ -7,7 +7,13 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="android:windowLightStatusBar">@bool/theme_is_light</item>
         <item name="android:windowLightNavigationBar">@bool/theme_is_light</item>
-        <item name="android:windowBackground">@color/update_background</item>
+        <item name="android:windowBackground">@drawable/updater_background</item>
+        <item name="android:popupMenuStyle">@style/UpdaterPopupMenu</item>
+        <item name="textAppearanceLargePopupMenu">@style/UpdaterPopupText</item>
+        <item name="textAppearanceSmallPopupMenu">@style/UpdaterPopupTextSmall</item>
+        <item name="alertDialogTheme">@style/UpdaterDialogStyle</item>
+        <item name="android:windowShowWallpaper">@bool/theme_show_wallpaper</item>
+        <item name="android:windowIsTranslucent">@bool/theme_translucent</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -23,7 +29,7 @@
     </style>
 
     <style name="TextAppearanceInverted" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/inverted</item>
+        <item name="android:textColor">@color/theme_accent</item>
     </style>
     <style name="TextAppearanceTransparent" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textColor">@android:color/transparent</item>
@@ -34,4 +40,30 @@
         <item name="android:dropDownVerticalOffset">8dp</item>
         <item name="android:dropDownHorizontalOffset">-16dp</item>
     </style>
+
+    <!-- Extra styles for Popups and dialogs -->
+    <style name="UpdaterPopupText" parent="TextAppearance.AppCompat.Light.Widget.PopupMenu.Large">
+        <item name="android:textColor">@color/theme_accent</item>
+    </style>
+
+    <style name="UpdaterPopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@color/popup_bg</item>
+    </style>
+    <style name="UpdaterPopupTextSmall" parent="TextAppearance.AppCompat.Light.Widget.PopupMenu.Small">
+        <item name="android:textColor">@color/theme_accent</item>
+    </style>
+
+    <style name="UpdaterAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/theme_accent</item>
+        <item name="android:textColor">@color/app_title_text_color</item>
+        <item name="android:textColorPrimary">@color/theme_accent</item>
+        <item name="android:background">@color/card_update_bg</item>
+    </style>
+
+    <style name="UpdaterDialogStyle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:textColor">@color/app_title_text_color</item>
+        <item name="android:textColorPrimary">@color/app_title_text_color</item>
+        <item name="android:background">@color/card_update_bg</item>
+    </style>
+
 </resources>

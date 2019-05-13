@@ -193,12 +193,6 @@ public class UpdatesActivity extends UpdatesListActivity {
                 showPreferencesDialog();
                 return true;
             }
-            case R.id.menu_show_changelog: {
-                Intent openUrl = new Intent(Intent.ACTION_VIEW,
-                        Uri.parse(Utils.getChangelogURL(this)));
-                startActivity(openUrl);
-                return true;
-            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -422,7 +416,7 @@ public class UpdatesActivity extends UpdatesListActivity {
         dataWarning.setChecked(prefs.getBoolean(Constants.PREF_MOBILE_DATA_WARNING, true));
         abPerfMode.setChecked(prefs.getBoolean(Constants.PREF_AB_PERF_MODE, false));
 
-        new AlertDialog.Builder(this)
+        new AlertDialog.Builder(this, R.style.UpdaterAlertDialogStyle)
                 .setTitle(R.string.menu_preferences)
                 .setView(view)
                 .setOnDismissListener(dialogInterface -> {

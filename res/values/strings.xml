@@ -27,7 +27,7 @@
          The path is relative to the root of the external storage.-->
     <string name="export_path" translatable="false">Shishu updates/</string>
 
-    <string name="updater_server_url" translatable="false">https://bootleggersrom-devices.github.io/api/devices.json</string>
+    <string name="updater_server_url" translatable="false">https://raw.githubusercontent.com/AyanC1/bliss_unofficial_OTA/athene/api.json</string>
 
     <string name="verification_failed_notification">Verification failed</string>
     <string name="verifying_download_notification">Verifying update</string>
